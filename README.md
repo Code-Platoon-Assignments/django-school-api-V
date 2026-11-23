@@ -86,3 +86,34 @@ Delete all the test files inside of each individual application. Add the `tests`
 ## Considerations
 
 You just made some changes to your student model, meaning you may have to adjust your tests regarding `serializers` to match the new output. Ensure to write serializers and validators to the best of your ability for all apps.
+
+## Running with Docker Compose
+
+This project runs as two containers, **Django** (`server/`) and **PostgreSQL** (`db/`), started together with Docker Compose. Run every command below from the root of this repository (where `docker-compose.yml` lives).
+
+```bash
+# build the images and start both containers in the background
+docker compose up -d --build
+
+# open a shell inside the Django container
+docker compose exec backend bash
+```
+
+Django commands must run **inside** the `backend` container, because `settings.py` reaches the database through the host name `db`:
+
+```bash
+# DOCKER CONTAINER TERMINAL
+python manage.py migrate
+python manage.py test
+```
+
+The API is served at [http://localhost:8000](http://localhost:8000). Useful commands:
+
+| Command | What it does |
+| ------- | ------------ |
+| `docker compose ps` | Lists the containers and their status |
+| `docker compose logs -f backend` | Follows Django's output |
+| `docker compose down` | Stops and removes the containers (the database volume is kept) |
+| `docker compose down -v` | Same, but also **deletes** the database volume |
+
+> Whenever you `pip install` a new package, run `pip freeze > requirements.txt` inside `server/` (with your virtual environment active) and then `docker compose up -d --build` so the image gets the new package.
